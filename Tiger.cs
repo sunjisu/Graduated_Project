@@ -135,9 +135,9 @@ public class Tiger : MonoBehaviour {
         currentTime = behaviorTime;
     }
 
-    private void Run(Vector3 _targetPos) // 플레이어를 인식했을때 달리기
+    private void Run(Vector3 _playerPos) // 플레이어를 인식했을때 달리기
     {
-        direction = Quaternion.LookRotation(transform.position + _targetPos).eulerAngles; // 플레이어쪽 바라봄
+        direction = Quaternion.LookRotation(transform.position + _playerPos).eulerAngles; // 플레이어쪽 바라봄
 
         currentTime = runTime; // 뛰기 시간 체크
         isWalking = false;

@@ -8,21 +8,62 @@ public class PlayerController : MonoBehaviour {
     // 플레이어 컴포넌트
     [SerializeField] private float walkSpeed;
     [SerializeField] private float runSpeed;
+    [SerializeField] private float jumpPower;
+
+    private float applySpeed; // 속도 넣어줌
+
+    private bool isRun = false;
+    private bool isGround; // 땅에 붙어 있는가?
+
+
     [SerializeField] private float playerRotateLimit; // 캐릭터 회전 제한
 
+    private CapsuleCollider myCol;
     private Rigidbody myRigid; 
 
 
 	// Use this for initialization
 	void Start () {
+        myCol = GetComponent<CapsuleCollider>();
         myRigid = GetComponent<Rigidbody>();
+        applySpeed = walkSpeed;
 	}
 
     // Update is called once per frame
     private void FixedUpdate()
     {
+        IsGround();
+        MoveState();
         Move();
         PlayerRotation();
+    }
+
+    private void IsGround()
+    {
+        isGround = Physics.Raycast(transform.position, Vector3.down, myCol.bounds.extents.y + 0.2f);
+    }
+
+    private void MoveState()
+    {
+        if(Input.GetKey(KeyCode.LeftShift))
+        {
+            isRun = true;
+            applySpeed = runSpeed;
+        }
+
+        if(Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            isRun = false;
+            applySpeed = walkSpeed;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space) && isGround)
+        {
+
+            isGround = false;
+            myRigid.velocity = transform.up * jumpPower;
+        }
+
     }
 
     private void PlayerRotation()
@@ -41,7 +82,7 @@ public class PlayerController : MonoBehaviour {
         Vector3 moveHorzontal = transform.right * moveDirX;
         Vector3 moveVertical = transform.forward * moveDirZ;
 
-        Vector3 movePos = (moveHorzontal + moveVertical).normalized * walkSpeed; // 움직임 체크
+        Vector3 movePos = (moveHorzontal + moveVertical).normalized * applySpeed; // 움직임 체크
 
         myRigid.MovePosition(transform.position + movePos * Time.deltaTime); 
     }

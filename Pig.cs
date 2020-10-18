@@ -112,6 +112,7 @@ public class Pig : MonoBehaviour {
     private void Wait()
     {
         currentTime = behaviorTime;
+        Debug.Log("대기");
 
     }
     
@@ -120,6 +121,7 @@ public class Pig : MonoBehaviour {
         isWalking = true;
         anim.SetBool("Walking", isWalking);
         currentTime = walkTime;
+        Debug.Log("걷기");
 
     }
 
@@ -127,36 +129,41 @@ public class Pig : MonoBehaviour {
     {
         anim.SetTrigger("Peek");
         currentTime = behaviorTime;
+        Debug.Log("두리번거리기");
     }
 
     private void Eat()
     {
         anim.SetTrigger("Eat");
         currentTime = behaviorTime;
+        Debug.Log("먹기");
     }
 
-    private void Run(Vector3 _targetPos) // 공격 받았을때 달리기
+    private void Run(Vector3 _playerPos) // 공격 받았을때 달리기
     {
-        direction = Quaternion.LookRotation(transform.position - _targetPos).eulerAngles; // 플레이어와 반대쪽 바라봄
+        direction = Quaternion.LookRotation(transform.position - _playerPos).eulerAngles; // 플레이어와 반대쪽 바라봄
 
         currentTime = runTime; // 뛰기 시간 체크
         isWalking = false; 
         isRunning = true; 
 
         anim.SetBool("Running", isRunning);
+        Debug.Log("달리기");
     }
 
-    public void Damage(int _dmg, Vector3 _targetPos)
+    public void Damage(int _dmg, Vector3 _playerPos)
     {
         hp -= _dmg;
         
 
         if(hp <= 0)
         {
+            Debug.Log("죽음");
             anim.SetTrigger("Dead");
+            return;
         }
 
         anim.SetTrigger("Hurt");
-        Run(_targetPos);
+        Run(_playerPos);
     }
 }
