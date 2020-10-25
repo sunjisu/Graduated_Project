@@ -45,19 +45,19 @@ public class PlayerController : MonoBehaviour {
 
     private void MoveState()
     {
-        if(Input.GetKey(KeyCode.LeftShift))
+        if(Input.GetKey(KeyCode.LeftShift)) // 왼쪽 쉬프트가 눌려있을때 실행
         {
             isRun = true;
             applySpeed = runSpeed;
         }
 
-        if(Input.GetKeyUp(KeyCode.LeftShift))
+        if(Input.GetKeyUp(KeyCode.LeftShift)) // 왼쪽 쉬프트에서 떨어졌을때 실행
         {
             isRun = false;
             applySpeed = walkSpeed;
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && isGround)
+        if (Input.GetKeyDown(KeyCode.Space) && isGround) // 스페이스가 눌렸을때 실행
         {
 
             isGround = false;

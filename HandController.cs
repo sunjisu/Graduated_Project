@@ -22,7 +22,7 @@ public class HandController : MonoBehaviour {
 
     private void Attack()
     {
-        if(Input.GetButton("Fire1")) // 마우스 왼쪽키가 눌렸을때
+        if(Input.GetButton("Fire1")) // 마우스 왼쪽키가 눌려있을때 실행
         {
             if(!isAttack)
             {
