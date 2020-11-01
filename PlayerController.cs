@@ -18,6 +18,8 @@ public class PlayerController : MonoBehaviour {
 
     [SerializeField] private float playerRotateLimit; // 캐릭터 회전 제한
 
+    GunController theGunController;
+
     private CapsuleCollider myCol;
     private Rigidbody myRigid; 
 
@@ -27,6 +29,7 @@ public class PlayerController : MonoBehaviour {
         myCol = GetComponent<CapsuleCollider>();
         myRigid = GetComponent<Rigidbody>();
         applySpeed = walkSpeed;
+        theGunController = FindObjectOfType<GunController>();
 	}
 
     // Update is called once per frame
@@ -47,6 +50,8 @@ public class PlayerController : MonoBehaviour {
     {
         if(Input.GetKey(KeyCode.LeftShift)) // 왼쪽 쉬프트가 눌려있을때 실행
         {
+            theGunController.CancelAiming(); // 뛰면 정조준모드 해제
+
             isRun = true;
             applySpeed = runSpeed;
         }
