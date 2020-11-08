@@ -13,6 +13,7 @@ public class GunController : MonoBehaviour {
     private bool isAiming = false; // 정조준중인가 체크
 
     private AudioSource audioSource;
+
     private RaycastHit hitInfo; // 공격 대상 체크
 
 
@@ -50,16 +51,10 @@ public class GunController : MonoBehaviour {
                     currentAttackSpeed = theGun.attackSpeed; // 공격 속도 계산
 
                     PlaySound(theGun.gunSound);
+                    
                     theGun.effect.Play();
 
-                    if (HitCheck())
-                    {
-                        if (hitInfo.transform.tag == "NPC")
-                        {
-                            hitInfo.transform.GetComponent<Pig>().Damage(theGun.power, transform.position);
-                        }
-                        Debug.Log(hitInfo.transform.name);
-                    }
+                    Hit();
 
                     StopAllCoroutines();
                     StartCoroutine(ReboundCourutine());// 총기 반동
@@ -72,6 +67,22 @@ public class GunController : MonoBehaviour {
                 }
             }
            
+        }
+    }
+
+    private void Hit()
+    {
+        if (HitCheck())
+        {
+            if (hitInfo.transform.tag == "NPC")
+            {                
+                hitInfo.transform.GetComponent<Pig>().Damage(theGun.power, transform.position);
+            }
+            else if (hitInfo.transform.tag == "Enemy A")
+            {
+                hitInfo.transform.GetComponent<Enemy>().Damage(theGun.power, transform.position);
+            }
+            Debug.Log(hitInfo.transform.name);
         }
     }
 
@@ -231,9 +242,16 @@ public class GunController : MonoBehaviour {
         }
     }
 
+
     private void PlaySound(AudioClip _clip)
     {
         audioSource.clip = _clip;
         audioSource.Play();
     }
+
+    public Gun GetGun()
+    {
+        return theGun;
+    }
+    
 }

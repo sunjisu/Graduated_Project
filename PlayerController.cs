@@ -9,9 +9,12 @@ public class PlayerController : MonoBehaviour {
     [SerializeField] private float walkSpeed;
     [SerializeField] private float runSpeed;
     [SerializeField] private float jumpPower;
+    [SerializeField] private int hp; // 체력
 
     private float applySpeed; // 속도 넣어줌
 
+
+    private bool isDamage = false;
     private bool isRun = false;
     private bool isGround; // 땅에 붙어 있는가?
 
@@ -60,6 +63,7 @@ public class PlayerController : MonoBehaviour {
         {
             isRun = false;
             applySpeed = walkSpeed;
+           
         }
 
         if (Input.GetKeyDown(KeyCode.Space) && isGround) // 스페이스가 눌렸을때 실행
@@ -92,5 +96,26 @@ public class PlayerController : MonoBehaviour {
         myRigid.MovePosition(transform.position + movePos * Time.deltaTime); 
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.tag == "EnemyBullet")
+        {
+            if(!isDamage)
+            {
+                Bullet enemyBullet = other.GetComponent<Bullet>();
+                hp -= enemyBullet.damage;
+                StartCoroutine(OnDamageCoroutine());
+            }          
+        }
+    }
+
+    IEnumerator OnDamageCoroutine()
+    {
+        isDamage = true;
+
+        yield return new WaitForSeconds(1f);
+
+        isDamage = false;
+    }
 
 }

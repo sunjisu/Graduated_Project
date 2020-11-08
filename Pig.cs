@@ -16,6 +16,8 @@ public class Pig : MonoBehaviour {
     private bool isWalking; // 걷기 체크
     private bool isRunning; // 뛰기 체크
 
+    private bool isDead = false; // 죽음상태
+
     [SerializeField] private float walkTime; // 걷는 시간
     [SerializeField] private float behaviorTime; // 행동 시간
     [SerializeField] private float runTime; // 달리기 시간
@@ -42,12 +44,12 @@ public class Pig : MonoBehaviour {
 
     private void Move()
     {
-        if (isWalking) // 걷는중일경우
+        if (isWalking && !isDead) // 걷는중일경우
         {
             // 이 속도로 계산해서 앞으로 걸어감
             rigid.MovePosition(transform.position + (transform.forward * walkSpeed * Time.deltaTime));
         }
-        else if(isRunning) // 뛰는중일경우
+        else if(isRunning && !isDead) // 뛰는중일경우
         {
             rigid.MovePosition(transform.position + (transform.forward * runSpeed * Time.deltaTime));
         }
@@ -83,7 +85,11 @@ public class Pig : MonoBehaviour {
         anim.SetBool("Walking", isWalking);
         anim.SetBool("Running", isRunning);
         direction.Set(0f, Random.Range(0f, 360f), 0f); // 0 ~ 360 까지 랜덤 방향 지정
-        RandomAction();
+        if(!isDead)
+        {
+            RandomAction();
+        }
+   
     }
 
     private void RandomAction()
@@ -112,7 +118,7 @@ public class Pig : MonoBehaviour {
     private void Wait()
     {
         currentTime = behaviorTime;
-        Debug.Log("대기");
+
 
     }
     
@@ -121,7 +127,7 @@ public class Pig : MonoBehaviour {
         isWalking = true;
         anim.SetBool("Walking", isWalking);
         currentTime = walkTime;
-        Debug.Log("걷기");
+
 
     }
 
@@ -129,41 +135,53 @@ public class Pig : MonoBehaviour {
     {
         anim.SetTrigger("Peek");
         currentTime = behaviorTime;
-        Debug.Log("두리번거리기");
+
     }
 
     private void Eat()
     {
         anim.SetTrigger("Eat");
         currentTime = behaviorTime;
-        Debug.Log("먹기");
+
     }
 
     private void Run(Vector3 _playerPos) // 공격 받았을때 달리기
     {
-        direction = Quaternion.LookRotation(transform.position - _playerPos).eulerAngles; // 플레이어와 반대쪽 바라봄
+        if(!isDead)
+        {
+            direction = Quaternion.LookRotation(transform.position - _playerPos).eulerAngles; // 플레이어와 반대쪽 바라봄
 
-        currentTime = runTime; // 뛰기 시간 체크
-        isWalking = false; 
-        isRunning = true; 
+            currentTime = runTime; // 뛰기 시간 체크
+            isWalking = false;
+            isRunning = true;
 
-        anim.SetBool("Running", isRunning);
-        Debug.Log("달리기");
+            anim.SetBool("Running", isRunning);
+            Debug.Log("달리기");
+        }       
     }
 
     public void Damage(int _dmg, Vector3 _playerPos)
     {
-        hp -= _dmg;
-        
-
-        if(hp <= 0)
+        if(!isDead)
         {
-            Debug.Log("죽음");
-            anim.SetTrigger("Dead");
-            return;
-        }
+            hp -= _dmg;
 
-        anim.SetTrigger("Hurt");
-        Run(_playerPos);
+
+            if (hp <= 0)
+            {
+                Debug.Log("죽음");
+                anim.SetTrigger("Dead");
+                isDead = true;
+
+                Destroy(gameObject, 3);
+
+                return;
+            }
+
+            anim.SetTrigger("Hurt");
+            Run(_playerPos);
+        }       
     }
+
+    
 }
