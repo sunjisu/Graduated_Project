@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour {
 
@@ -9,7 +10,9 @@ public class PlayerController : MonoBehaviour {
     [SerializeField] private float walkSpeed;
     [SerializeField] private float runSpeed;
     [SerializeField] private float jumpPower;
+    private int currentHp;
     [SerializeField] private int hp; // 체력
+
 
     private float applySpeed; // 속도 넣어줌
 
@@ -23,6 +26,9 @@ public class PlayerController : MonoBehaviour {
 
     GunController theGunController;
 
+    public Image hpbar;
+    public Text hp_text;
+
     private CapsuleCollider myCol;
     private Rigidbody myRigid; 
 
@@ -33,7 +39,9 @@ public class PlayerController : MonoBehaviour {
         myRigid = GetComponent<Rigidbody>();
         applySpeed = walkSpeed;
         theGunController = FindObjectOfType<GunController>();
-	}
+
+        currentHp = hp; // 현재 hp에 최대 hp넣어줌
+    }
 
     // Update is called once per frame
     private void FixedUpdate()
@@ -42,6 +50,9 @@ public class PlayerController : MonoBehaviour {
         MoveState();
         Move();
         PlayerRotation();
+
+        hp_text.text = hp.ToString();
+        hpbar.rectTransform.localScale = new Vector3((float)hp / (float)currentHp, 1f, 1f);
     }
 
     private void IsGround()
@@ -104,6 +115,11 @@ public class PlayerController : MonoBehaviour {
             {
                 Bullet enemyBullet = other.GetComponent<Bullet>();
                 hp -= enemyBullet.damage;
+                if(other.GetComponent<Rigidbody>() != null) // 총알이 닿았을때 그 총알 파괴
+                {
+                    Destroy(other.gameObject);
+                }
+
                 StartCoroutine(OnDamageCoroutine());
             }          
         }

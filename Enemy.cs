@@ -6,13 +6,15 @@ using UnityEngine.AI;
 
 
 public class Enemy : MonoBehaviour
-{
-
+{    
+    public enum Type { A, B, C };
+    public Type enemyType;
     [SerializeField] private string enemyName; // 동물의 이름
     [SerializeField] private int hp; // 적의 체력
     private int currentHp;
     [SerializeField] private Transform target;
     [SerializeField] private BoxCollider meleeArea;
+    [SerializeField] private GameObject bullet;
 
     public Image hpbar;
 
@@ -38,7 +40,7 @@ public class Enemy : MonoBehaviour
         nav = GetComponent<NavMeshAgent>();
         anim = GetComponentInChildren<Animator>();
 
-        currentHp = hp;
+        currentHp = hp; // 현재 hp에 최대 hp넣어줌
 
         Invoke("ChaseStart", 2);
 
@@ -68,16 +70,32 @@ public class Enemy : MonoBehaviour
         hpbar.rectTransform.localScale = new Vector3(1f, 1f, 1f); // hp 바 세팅
     }
 
-    private void Targetting()
+    private void Targetting() // 공격 범위 설정 
     {
-        float targetRadius = 0.5f;
-        float targetRange = 1.5f;
+        float targetRadius = 0;
+        float targetRange = 0;
+
+        switch (enemyType)
+        {
+            case Type.A:
+                targetRadius = 0.5f;
+                targetRange = 1.5f;
+                break;
+            case Type.B:
+                break;
+            case Type.C:
+                targetRadius = 0.16f;
+                targetRange = 20f;
+                break;
+            default:
+                break;
+        }
 
         RaycastHit[] rayHits = Physics.SphereCastAll(transform.position, targetRadius,
                                                      transform.forward, targetRange,
                                                      LayerMask.GetMask("Player")); // 플레이어에 닿으면 
 
-        if(rayHits.Length > 0 && !isAttack)
+        if(rayHits.Length > 0 && !isAttack) // 충돌한게 있고 공격 실행중이 아니라면
         {
             StartCoroutine(AttackCoroutine()); // 공격실행
         }
@@ -85,19 +103,41 @@ public class Enemy : MonoBehaviour
 
     IEnumerator AttackCoroutine()
     {
-        isChase = false;
+        isChase = false; 
         isAttack = true;
         anim.SetBool("Attack", true);
-       
-        yield return new WaitForSeconds(0.2f);
 
-        meleeArea.enabled = true;
+        switch (enemyType)
+        {
+            case Type.A:
 
-        yield return new WaitForSeconds(1f);
-        
-        meleeArea.enabled = false;
+                yield return new WaitForSeconds(0.2f);
 
-        yield return new WaitForSeconds(1f);
+                meleeArea.enabled = true;
+
+                yield return new WaitForSeconds(1f);
+
+                meleeArea.enabled = false;
+
+                yield return new WaitForSeconds(1f);
+
+                break;
+            case Type.B:
+                break;
+            case Type.C:
+                if(!isDead)
+                {
+                    yield return new WaitForSeconds(0.5f);
+
+                    GameObject instantBullet = Instantiate(bullet, transform.position, transform.rotation);
+                    Rigidbody rigidBullet = instantBullet.GetComponent<Rigidbody>();
+                    rigidBullet.velocity = transform.forward * 20;
+
+                    yield return new WaitForSeconds(2f);
+
+                }
+                break;
+        }       
 
         isChase = true;
         isAttack = false;
@@ -117,7 +157,7 @@ public class Enemy : MonoBehaviour
     }
 
     
-    public void Damage(int _dmg, Vector3 _playerPos)
+    public void Damage(int _dmg, Vector3 _playerPos) // 데미지를 받았을때
     {
         if (!isDead)
         {

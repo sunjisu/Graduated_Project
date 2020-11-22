@@ -82,6 +82,10 @@ public class GunController : MonoBehaviour {
             {
                 hitInfo.transform.GetComponent<Enemy>().Damage(theGun.power, transform.position);
             }
+            else if(hitInfo.transform.tag == "Enemy C")
+            {
+                hitInfo.transform.GetComponent<Enemy>().Damage(theGun.power, transform.position);
+            }
             Debug.Log(hitInfo.transform.name);
         }
     }
