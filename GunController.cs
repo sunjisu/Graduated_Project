@@ -5,22 +5,26 @@ using UnityEngine;
 public class GunController : MonoBehaviour {
 
     [SerializeField] private Gun theGun;
-    [SerializeField] private Vector3 originPos; // 원래 위치
+    private Vector3 originPos; // 원래 위치
 
     private float currentAttackSpeed;
 
     private bool isReload = false; // 재장전 중인가 체크
     private bool isAiming = false; // 정조준중인가 체크
 
+    [SerializeField] GameObject hit_effect; // 피격 이팩트
+
     private AudioSource audioSource;
 
     private RaycastHit hitInfo; // 공격 대상 체크
 
-
+    private Crosshair theCrosshair;
 
     private void Start()
     {
+        originPos = Vector3.zero;
         audioSource = GetComponent<AudioSource>();
+        theCrosshair = FindObjectOfType<Crosshair>();
     }
 
     void Update () {
@@ -46,6 +50,8 @@ public class GunController : MonoBehaviour {
             {
                 if (theGun.currentBulletCount > 0)
                 {
+                    theCrosshair.FireAnimation();
+
                     theGun.currentBulletCount--;
 
                     currentAttackSpeed = theGun.attackSpeed; // 공격 속도 계산
@@ -59,7 +65,6 @@ public class GunController : MonoBehaviour {
                     StopAllCoroutines();
                     StartCoroutine(ReboundCourutine());// 총기 반동
 
-                    Debug.Log("총알 발사");
                 }
                 else
                 {
@@ -93,8 +98,14 @@ public class GunController : MonoBehaviour {
     private bool HitCheck()
     {
         // 충돌한게 있다면
-        if (Physics.Raycast(transform.position, transform.forward, out hitInfo, theGun.attackRange))
+        if (Physics.Raycast(transform.position, transform.forward + 
+            new Vector3(Random.Range(-theCrosshair.GetAccuracy() - theGun.accuracy, theCrosshair.GetAccuracy() + theGun.accuracy),
+                        Random.Range(-theCrosshair.GetAccuracy() - theGun.accuracy, theCrosshair.GetAccuracy() + theGun.accuracy),
+                        0)
+            , out hitInfo, theGun.attackRange))
         {
+            var clone = Instantiate(hit_effect, hitInfo.point, Quaternion.LookRotation(hitInfo.normal)); // 이펙트 표시
+            Destroy(clone, 2f);
             return true;
         }
 
@@ -152,11 +163,13 @@ public class GunController : MonoBehaviour {
 
             if(isAiming)
             {
+                theCrosshair.AimingAnimation(isAiming);
                 StopAllCoroutines(); // 모든 코루틴 멈춤
                 StartCoroutine(AimingCorutine());
             }
             else
             {
+                theCrosshair.AimingAnimation(isAiming);
                 StopAllCoroutines();
                 StartCoroutine(NormalCorutine());
             }
@@ -256,6 +269,11 @@ public class GunController : MonoBehaviour {
     public Gun GetGun()
     {
         return theGun;
+    }
+
+    public bool GetAimingMode()
+    {
+        return isAiming;
     }
     
 }

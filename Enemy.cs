@@ -160,9 +160,10 @@ public class Enemy : MonoBehaviour
     public void Damage(int _dmg, Vector3 _playerPos) // 데미지를 받았을때
     {
         if (!isDead)
-        {
+        {            
             currentHp -= _dmg;
 
+            StartCoroutine(DamageCoroutine());
 
             if (currentHp <= 0)
             {
@@ -180,6 +181,22 @@ public class Enemy : MonoBehaviour
             }         
             
         }
+    }
+
+    IEnumerator DamageCoroutine()
+    {
+        mat.color = Color.red;
+        yield return new WaitForSeconds(0.1f);
+
+        if(currentHp >0)
+        {
+            mat.color = Color.white;
+        }
+        else
+        {
+            mat.color = Color.gray;
+           
+        }        
     }
     
 }

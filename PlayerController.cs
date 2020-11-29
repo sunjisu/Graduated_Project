@@ -18,12 +18,16 @@ public class PlayerController : MonoBehaviour {
 
 
     private bool isDamage = false;
+    private bool isWalk = false;
     private bool isRun = false;
-    private bool isGround; // 땅에 붙어 있는가?
+    private bool isGround = true; // 땅에 붙어 있는가?
+
+    private Vector3 lastPos; // 이전 프레임 위치
 
 
     [SerializeField] private float playerRotateLimit; // 캐릭터 회전 제한
 
+    private Crosshair theCrosshair;
     GunController theGunController;
 
     public Image hpbar;
@@ -36,10 +40,11 @@ public class PlayerController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         myCol = GetComponent<CapsuleCollider>();
-        myRigid = GetComponent<Rigidbody>();
-        applySpeed = walkSpeed;
+        myRigid = GetComponent<Rigidbody>();        
         theGunController = FindObjectOfType<GunController>();
+        theCrosshair = FindObjectOfType<Crosshair>();
 
+        applySpeed = walkSpeed;
         currentHp = hp; // 현재 hp에 최대 hp넣어줌
     }
 
@@ -49,6 +54,7 @@ public class PlayerController : MonoBehaviour {
         IsGround();
         MoveState();
         Move();
+        MoveCheck();
         PlayerRotation();
 
         hp_text.text = hp.ToString();
@@ -67,12 +73,14 @@ public class PlayerController : MonoBehaviour {
             theGunController.CancelAiming(); // 뛰면 정조준모드 해제
 
             isRun = true;
+            theCrosshair.RunningAnimation(isRun);
             applySpeed = runSpeed;
         }
 
         if(Input.GetKeyUp(KeyCode.LeftShift)) // 왼쪽 쉬프트에서 떨어졌을때 실행
         {
             isRun = false;
+            theCrosshair.RunningAnimation(isRun);
             applySpeed = walkSpeed;
            
         }
@@ -105,6 +113,25 @@ public class PlayerController : MonoBehaviour {
         Vector3 movePos = (moveHorzontal + moveVertical).normalized * applySpeed; // 움직임 체크
 
         myRigid.MovePosition(transform.position + movePos * Time.deltaTime); 
+    }
+
+    private void MoveCheck()
+    {
+        if (!isRun && isGround)
+        {
+            if (Vector3.Distance(lastPos, transform.position) >= 0.01f) // 마지막 위치와 현재위치의 차이가 0.01보다 크다면
+            {
+                isWalk = true;
+
+            }
+            else
+            {
+                isWalk = false;
+            }
+            theCrosshair.WalkingAnimation(isWalk);
+            lastPos = transform.position;
+        }
+
     }
 
     private void OnTriggerEnter(Collider other)
